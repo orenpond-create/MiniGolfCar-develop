@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/^--- !u!/{id=$3} /fileID/{next} {print}' TestScene3_CarC.unity)",
+      "WebFetch(domain:il.ingamejob.com)",
+      "WebFetch(domain:www.moonactive.com)",
+      "WebFetch(domain:company.plarium.com)",
+      "WebSearch",
+      "Bash(python build_jobs_xlsx.py)",
+      "PowerShell(python \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Unity-Projects-V2-3D-LearnZone-MiniCarGolf\\\\5e9cef5b-80a3-4f9f-b781-09d992a7262c\\\\scratchpad\\\\build_jobs_xlsx.py\")",
+      "PowerShell(py -0p)",
+      "PowerShell(py -3 -c \"import sys, openpyxl; print\\(sys.version\\); print\\('openpyxl', openpyxl.__version__\\)\")",
+      "PowerShell(\"---\")",
+      "PowerShell(py -3.7 -m pip install --quiet openpyxl 2>&1 | Select-Object -Last 5; \"exit=$LASTEXITCODE\"; py -3.7 -c \"import openpyxl; print\\('openpyxl', openpyxl.__version__\\)\")",
+      "PowerShell(py -3.7 \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Unity-Projects-V2-3D-LearnZone-MiniCarGolf\\\\5e9cef5b-80a3-4f9f-b781-09d992a7262c\\\\scratchpad\\\\build_jobs_xlsx.py\")",
+      "Bash(python -c \"import pdfplumber, sys; print\\('pdfplumber OK'\\)\")",
+      "PowerShell(python --version)",
+      "PowerShell(python -c \"import pdfplumber; print\\('pdfplumber OK'\\)\" 2>&1)",
+      "PowerShell(py -c \"import pdfplumber; print\\('pdfplumber', pdfplumber.__version__\\)\" 2>&1)",
+      "PowerShell(py -c \"import docx; print\\('python-docx OK'\\)\" 2>&1)",
+      "PowerShell(py -c \"import pypdf; print\\('pypdf OK'\\)\" 2>&1)",
+      "PowerShell(py -c \"import fitz; print\\('pymupdf OK'\\)\" 2>&1)",
+      "PowerShell(py -m pip install --quiet pymupdf python-docx pdfplumber 2>&1)",
+      "PowerShell(py -m pip install --quiet \"python-docx==0.8.11\" \"pymupdf==1.21.1\" 2>&1)",
+      "PowerShell(py -c \"import fitz; print\\('pymupdf', fitz.__doc__[:40]\\)\")",
+      "PowerShell(py -c \"import docx; print\\('python-docx OK'\\)\")",
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Unity-Projects-V2-3D-LearnZone-MiniCarGolf\\\\77122cb9-6955-4192-9cea-e1c502ce5336\\\\scratchpad\\\\extract.py\" 2>&1)",
+      "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Unity-Projects-V2-3D-LearnZone-MiniCarGolf\\\\77122cb9-6955-4192-9cea-e1c502ce5336\\\\scratchpad\\\\render.py\" 2>&1)",
+      "Bash(grep -n -B2 -A14 \"m_Name: CarB\\\\|m_Name: carB\\\\|m_Name: Car$\\\\|m_Name: Body\\\\|m_Name: Wheel\" Assets/Scenes/TestScene3_CarB.unity)"
+    ]
+  }
+}
