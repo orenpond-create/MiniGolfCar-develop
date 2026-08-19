@@ -26,7 +26,11 @@
       "PowerShell(py -c \"import docx; print\\('python-docx OK'\\)\")",
       "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Unity-Projects-V2-3D-LearnZone-MiniCarGolf\\\\77122cb9-6955-4192-9cea-e1c502ce5336\\\\scratchpad\\\\extract.py\" 2>&1)",
       "PowerShell(py \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--Unity-Projects-V2-3D-LearnZone-MiniCarGolf\\\\77122cb9-6955-4192-9cea-e1c502ce5336\\\\scratchpad\\\\render.py\" 2>&1)",
-      "Bash(grep -n -B2 -A14 \"m_Name: CarB\\\\|m_Name: carB\\\\|m_Name: Car$\\\\|m_Name: Body\\\\|m_Name: Wheel\" Assets/Scenes/TestScene3_CarB.unity)"
+      "Bash(grep -n -B2 -A14 \"m_Name: CarB\\\\|m_Name: carB\\\\|m_Name: Car$\\\\|m_Name: Body\\\\|m_Name: Wheel\" Assets/Scenes/TestScene3_CarB.unity)",
+      "Bash(grep -vE \"PlayerValues|PlayerScore|//|\\\\\"Player\\\\\"|FindWithTag|CompareTag\")",
+      "Bash(mv \"Player.cs\" \"HammerPlayer.cs\")",
+      "Bash(mv \"Player.cs.meta\" \"HammerPlayer.cs.meta\")",
+      "PowerShell(Get-Process -Name \"Unity\",\"UnityHub\",\"UnityShaderCompiler\" -ErrorAction SilentlyContinue | Select-Object Name, Id, @{N='StartedFrom';E={$_.Path}} | Format-Table -AutoSize; if \\(-not \\(Get-Process -Name \"Unity\" -ErrorAction SilentlyContinue\\)\\) { \"Unity Editor process: NOT running \\(safe to delete\\)\" } else { \"Unity Editor process: RUNNING — do not delete yet\" })"
     ]
   }
 }
