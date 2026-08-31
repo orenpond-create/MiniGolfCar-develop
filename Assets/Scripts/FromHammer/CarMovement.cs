@@ -20,6 +20,7 @@ public class CarMovement : MonoBehaviour
     [SerializeField] CarMovementSpeed movementSpeed;          // was referenced but never declared in the old project
     public float rotateSpeedOnNormalSpeed = 90f;             // deg/sec while below normalSpeed
     public float rotateSpeedOnMaxSpeed = 120f;              // deg/sec at high speed
+    [SerializeField] float maxTiltAngle = 50f;             // anti-flip: max tilt from upright (deg); was hardcoded 50 in KeepSafeAngles
     [Header("Ground Check")]
     [SerializeField] LayerMask groundMask;                   // replaces LevelManager.layerMaskEnemy_Solids_NotPlayer
     [SerializeField] float checkGroundSensitivity = 1f;
@@ -64,9 +65,6 @@ public class CarMovement : MonoBehaviour
             return;
 
         ReadInput();
-        if (!isStoping)
-            Rotate();
-        KeepSafeAngles();
     }
 
     void FixedUpdate()
@@ -86,6 +84,8 @@ public class CarMovement : MonoBehaviour
         {
             myRigidBody.AddForce(10f * Vector3.down, ForceMode.Acceleration);
         }
+
+        ApplyRotation();
     }
 
     // Always driving forward; LMB steers left, RMB steers right, BOTH brakes to a stop.
@@ -110,12 +110,23 @@ public class CarMovement : MonoBehaviour
         }
     }
 
-    void Rotate()
+    // Steering + tilt clamp, both applied through the Rigidbody (MoveRotation) in FixedUpdate so
+    // they respect collisions instead of teleporting the collider into obstacles (fixes 1 & 2).
+    void ApplyRotation()
     {
-        float turnRate = (myRigidBody.velocity.sqrMagnitude <= movementSpeed.normalSpeed)
-            ? rotateSpeedOnNormalSpeed
-            : rotateSpeedOnMaxSpeed;
-        transform.Rotate(0f, rotateDirection * turnRate * Time.deltaTime, 0f);
+        Quaternion target = myRigidBody.rotation;
+
+        // Steer (yaw) unless braking.
+        if (!isStoping && rotateDirection != 0f)
+        {
+            float turnRate = (myRigidBody.velocity.sqrMagnitude <= movementSpeed.normalSpeed)
+                ? rotateSpeedOnNormalSpeed
+                : rotateSpeedOnMaxSpeed;
+            target = target * Quaternion.Euler(0f, rotateDirection * turnRate * Time.fixedDeltaTime, 0f);
+        }
+
+        target = ClampSafeAngles(target);
+        myRigidBody.MoveRotation(target);
     }
 
     void MoveRigidBodyFwd()
@@ -160,21 +171,20 @@ public class CarMovement : MonoBehaviour
         return Physics.Raycast(origin, direction, out hit, checkGroundSensitivity, groundMask);
     }
 
-    void KeepSafeAngles()
+    // Physics-friendly anti-flip: limits total tilt (pitch+roll combined) to maxTiltAngle from
+    // upright, preserving heading. Replaces the old KeepSafeAngles() which hard-set
+    // transform.rotation and teleported the collider into obstacles (the "jump" bug).
+    Quaternion ClampSafeAngles(Quaternion rotation)
     {
-        float x = transform.eulerAngles.x;
-        float y = transform.eulerAngles.y;
-        float z = transform.eulerAngles.z;
-        if (transform.eulerAngles.x > 100 && transform.eulerAngles.x < 310)
-            x = 310;
-        if (transform.eulerAngles.x < 100 && transform.eulerAngles.x > 50)
-            x = 50;
-        if (transform.eulerAngles.z > 100 && transform.eulerAngles.z < 310)
-            z = 310;
-        if (transform.eulerAngles.z < 100 && transform.eulerAngles.z > 50)
-            z = 50;
+        Vector3 up = rotation * Vector3.up;
+        float tilt = Vector3.Angle(Vector3.up, up);
+        if (tilt <= maxTiltAngle)
+            return rotation;
 
-        transform.rotation = Quaternion.Euler(x, y, z);
+        // Bring 'up' back to exactly maxTiltAngle from world-up along the same lean direction,
+        // then apply that minimal correction (which keeps yaw intact).
+        Vector3 desiredUp = Vector3.RotateTowards(Vector3.up, up, maxTiltAngle * Mathf.Deg2Rad, 0f);
+        return Quaternion.FromToRotation(up, desiredUp) * rotation;
     }
     #endregion
 }
