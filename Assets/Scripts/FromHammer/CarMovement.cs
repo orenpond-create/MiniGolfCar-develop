@@ -24,6 +24,12 @@ public class CarMovement : MonoBehaviour
     [Header("Ground Check")]
     [SerializeField] LayerMask groundMask;                   // replaces LevelManager.layerMaskEnemy_Solids_NotPlayer
     [SerializeField] float checkGroundSensitivity = 1f;
+    [Header("Stuck / Recovery")]
+    [SerializeField] CarMovementSpeed recoverySpeed;        // slow accel + low max used right after getting unstuck
+    [SerializeField] float stuckSpeedThreshold = 0.5f;      // forward speed below this counts as "not moving"
+    [SerializeField] float stuckDetectTime = 0.4f;          // blocked this long -> stuck
+    [SerializeField] float recoveryTime = 1.5f;             // X: slow-drive duration after getting unstuck
+    [SerializeField] float unstuckHeadingDelta = 20f;       // must rotate this many degrees from the stuck heading to retry
     [Header("Object Bottom Points")]
     public Transform forwardPoint;
     public Transform backPoint;
@@ -45,6 +51,10 @@ public class CarMovement : MonoBehaviour
     bool onGround;
     Vector3 down;
     RaycastHit hit;
+    bool isStuck;
+    float stuckTimer;
+    float recoveryTimer;      // counts down while recovering; 0 = fully back to normal
+    float stuckHeading;       // yaw (deg) recorded when we got stuck
     #endregion
 
     #region Enums
@@ -76,7 +86,11 @@ public class CarMovement : MonoBehaviour
         if (onGround)
         {
             if (!isStoping)
-                MoveRigidBodyFwd();
+            {
+                UpdateStuckState();
+                if (!isStuck)
+                    MoveRigidBodyFwd();
+            }
             else
                 StopRigidBody();
         }
@@ -129,13 +143,59 @@ public class CarMovement : MonoBehaviour
         myRigidBody.MoveRotation(target);
     }
 
+    // Detects being jammed (trying to drive but not actually moving forward), and re-arms once
+    // you've steered far enough away to be worth retrying. Rotation is untouched, so you can
+    // always turn while stuck.
+    void UpdateStuckState()
+    {
+        float forwardSpeed = Vector3.Dot(myRigidBody.velocity, transform.forward);
+
+        if (!isStuck)
+        {
+            if (forwardSpeed < stuckSpeedThreshold)
+            {
+                stuckTimer += Time.fixedDeltaTime;
+                if (stuckTimer >= stuckDetectTime)
+                {
+                    isStuck = true;
+                    stuckHeading = transform.eulerAngles.y;
+                    stuckTimer = 0f;
+                }
+            }
+            else
+                stuckTimer = 0f;             // making progress -> not stuck
+        }
+        else
+        {
+            // Re-arm once you've rotated far enough from the heading you got stuck at,
+            // then resume driving in slow-recovery mode.
+            float headingDelta = Mathf.Abs(Mathf.DeltaAngle(stuckHeading, transform.eulerAngles.y));
+            if (headingDelta >= unstuckHeadingDelta)
+            {
+                isStuck = false;
+                recoveryTimer = recoveryTime;
+            }
+        }
+    }
+
     void MoveRigidBodyFwd()
     {
+        // Count down the recovery timer and blend accel/max from the slow recovery profile
+        // back up to the normal one. blend: 0 = just unstuck (slow), 1 = normal.
+        if (recoveryTimer > 0f)
+            recoveryTimer = Mathf.Max(0f, recoveryTimer - Time.fixedDeltaTime);
+        float blend = (recoveryTime > 0f) ? 1f - (recoveryTimer / recoveryTime) : 1f;
+
+        float normalSpeed = Mathf.Lerp(recoverySpeed.normalSpeed, movementSpeed.normalSpeed, blend);
+        float maxSpeed    = Mathf.Lerp(recoverySpeed.maxSpeed,    movementSpeed.maxSpeed,    blend);
+        float accelNormal = Mathf.Lerp(recoverySpeed.accelerationNormalSpeed, movementSpeed.accelerationNormalSpeed, blend);
+        float accelMax    = Mathf.Lerp(recoverySpeed.accelerationMaxSpeed,    movementSpeed.accelerationMaxSpeed,    blend);
+
         float sqrSpeed = myRigidBody.velocity.sqrMagnitude;
-        if (sqrSpeed < movementSpeed.normalSpeed)
-            myRigidBody.AddForce(transform.forward * movementSpeed.accelerationNormalSpeed * Time.fixedDeltaTime, ForceMode.Force);
-        else if (sqrSpeed < movementSpeed.maxSpeed)
-            myRigidBody.AddForce(transform.forward * movementSpeed.accelerationMaxSpeed * Time.fixedDeltaTime, ForceMode.Force);
+        if (sqrSpeed < normalSpeed)
+            myRigidBody.AddForce(transform.forward * accelNormal * Time.fixedDeltaTime, ForceMode.Force);
+        else if (sqrSpeed < maxSpeed)
+            myRigidBody.AddForce(transform.forward * accelMax * Time.fixedDeltaTime, ForceMode.Force);
         // else at/over maxSpeed: coast, no extra force
     }
 
