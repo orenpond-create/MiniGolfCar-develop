@@ -1,0 +1,1 @@
+Warning: None triangle mesh: Cube.007_Cube.008 (file: 'E:\Unity Projects V2\3D_LearnZone_MiniCarGolf\Assets\Scripts\FromHammer\Car\Hummer_V2.fbx') [ (line 0)]

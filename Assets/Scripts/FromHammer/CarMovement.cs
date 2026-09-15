@@ -1,5 +1,4 @@
 using UnityEngine;
-
 // Adapted from the old project's virtual-joystick car into this project's mouse scheme:
 //   - Always drives forward (when grounded).
 //   - Left mouse button  = steer left.
@@ -55,6 +54,7 @@ public class CarMovement : MonoBehaviour
     float stuckTimer;
     float recoveryTimer;      // counts down while recovering; 0 = fully back to normal
     float stuckHeading;       // yaw (deg) recorded when we got stuck
+    [SerializeField] TMPro.TextMeshProUGUI messageLabel;
     #endregion
 
     #region Enums
@@ -175,6 +175,11 @@ public class CarMovement : MonoBehaviour
                 isStuck = false;
                 recoveryTimer = recoveryTime;
             }
+        }
+        if (messageLabel != null)
+        {
+            messageLabel.text = "Is Stuck " + isStuck + " " + stuckTimer + "Time";
+            messageLabel.text += "\n" + "SQR Velocity " + myRigidBody.velocity.sqrMagnitude;
         }
     }
 
