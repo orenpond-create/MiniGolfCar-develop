@@ -4,9 +4,10 @@ using UnityEngine;
 //   - Left mouse button  = steer left.
 //   - Right mouse button = steer right.
 //   - Both buttons       = brake, coasting to a stop.
-// Kept from the original: 9-point ground check, extra gravity while airborne, the two-tier
-// (normal/max) speed profile, and KeepSafeAngles() anti-flip clamping.
-// Removed: LevelManager/virtualJoystick input, the unused turbo "override movement speed" system.
+// Kept from the original: 9-point ground check, extra gravity while airborne and anti-flip clamping.
+// Speed is driven by CarMovementSpeed profiles: movementSpeed (normal), recoverySpeed (after
+// getting unstuck) and temporary overrides (SetSpeedOverride) from turbo pads / slow zones.
+// Removed: LevelManager/virtualJoystick input.
 public class CarMovement : MonoBehaviour
 {
     #region Fields
@@ -16,9 +17,7 @@ public class CarMovement : MonoBehaviour
     [Header("RigidBody Values")]
     public Vector3 centerOfMass;
     [Header("Speed / Steering Values")]
-    [SerializeField] CarMovementSpeed movementSpeed;          // was referenced but never declared in the old project
-    public float rotateSpeedOnNormalSpeed = 90f;             // deg/sec while below normalSpeed
-    public float rotateSpeedOnMaxSpeed = 120f;              // deg/sec at high speed
+    [SerializeField] CarMovementSpeed movementSpeed;          // the normal profile
     [SerializeField] float maxTiltAngle = 50f;             // anti-flip: max tilt from upright (deg); was hardcoded 50 in KeepSafeAngles
     [Header("Ground Check")]
     [SerializeField] LayerMask groundMask;                   // replaces LevelManager.layerMaskEnemy_Solids_NotPlayer
@@ -53,7 +52,10 @@ public class CarMovement : MonoBehaviour
     bool isStuck;
     float stuckTimer;
     float recoveryTimer;      // counts down while recovering; 0 = fully back to normal
-    float stuckHeading;       // yaw (deg) recorded when we got stuck
+    float recoveryBlend = 1f; // 0 = just unstuck (recoverySpeed values), 1 = fully on the active profile
+    float stuckHeading;      // yaw (deg) recorded when we got stuck
+    CarMovementSpeed activeSpeed;   // profile currently driving with: movementSpeed normally, or an override
+    float overrideTimer;            // seconds left on a timed override; Infinity = indefinite until cleared
     [SerializeField] TMPro.TextMeshProUGUI messageLabel;
     #endregion
 
@@ -67,6 +69,7 @@ public class CarMovement : MonoBehaviour
         myRigidBody = GetComponentInChildren<Rigidbody>();
         onFliping = false;
         myRigidBody.centerOfMass = centerOfMass;
+        activeSpeed = movementSpeed;
     }
 
     void Update()
@@ -75,6 +78,7 @@ public class CarMovement : MonoBehaviour
             return;
 
         ReadInput();
+        TickSpeedOverride();
     }
 
     void FixedUpdate()
@@ -82,6 +86,7 @@ public class CarMovement : MonoBehaviour
         if (onFliping || pauseMovement)
             return;
 
+        TickRecovery();
         CheckOnGround();
         if (onGround)
         {
@@ -124,6 +129,32 @@ public class CarMovement : MonoBehaviour
         }
     }
 
+    // Temporarily drive with a different speed profile (e.g. a turbo pad or speed zone).
+    // duration > 0  -> reverts automatically after that many seconds.
+    // duration <= 0 -> stays until ClearSpeedOverride() is called (good for enter/exit zones).
+    public void SetSpeedOverride(CarMovementSpeed profile, float duration)
+    {
+        if (profile == null)
+            return;
+        activeSpeed = profile;
+        overrideTimer = (duration > 0f) ? duration : Mathf.Infinity;
+    }
+
+    public void ClearSpeedOverride()
+    {
+        activeSpeed = movementSpeed;
+        overrideTimer = 0f;
+    }
+
+    void TickSpeedOverride()
+    {
+        if (activeSpeed == movementSpeed || float.IsInfinity(overrideTimer))
+            return;                           // no override active, or indefinite until cleared
+        overrideTimer -= Time.deltaTime;
+        if (overrideTimer <= 0f)
+            ClearSpeedOverride();
+    }
+
     // Steering + tilt clamp, both applied through the Rigidbody (MoveRotation) in FixedUpdate so
     // they respect collisions instead of teleporting the collider into obstacles (fixes 1 & 2).
     void ApplyRotation()
@@ -133,9 +164,7 @@ public class CarMovement : MonoBehaviour
         // Steer (yaw) unless braking.
         if (!isStoping && rotateDirection != 0f)
         {
-            float turnRate = (myRigidBody.velocity.sqrMagnitude <= movementSpeed.normalSpeed)
-                ? rotateSpeedOnNormalSpeed
-                : rotateSpeedOnMaxSpeed;
+            float turnRate = Mathf.Lerp(recoverySpeed.rotateSpeed, activeSpeed.rotateSpeed, recoveryBlend);
             target = target * Quaternion.Euler(0f, rotateDirection * turnRate * Time.fixedDeltaTime, 0f);
         }
 
@@ -183,25 +212,42 @@ public class CarMovement : MonoBehaviour
         }
     }
 
-    void MoveRigidBodyFwd()
+    // Counts down the post-stuck recovery and updates the shared blend used by driving AND steering.
+    // blend: 0 = just unstuck (recoverySpeed values), 1 = fully on the active profile.
+    void TickRecovery()
     {
-        // Count down the recovery timer and blend accel/max from the slow recovery profile
-        // back up to the normal one. blend: 0 = just unstuck (slow), 1 = normal.
         if (recoveryTimer > 0f)
             recoveryTimer = Mathf.Max(0f, recoveryTimer - Time.fixedDeltaTime);
-        float blend = (recoveryTime > 0f) ? 1f - (recoveryTimer / recoveryTime) : 1f;
+        recoveryBlend = (recoveryTime > 0f) ? 1f - (recoveryTimer / recoveryTime) : 1f;
+    }
 
-        float normalSpeed = Mathf.Lerp(recoverySpeed.normalSpeed, movementSpeed.normalSpeed, blend);
-        float maxSpeed    = Mathf.Lerp(recoverySpeed.maxSpeed,    movementSpeed.maxSpeed,    blend);
-        float accelNormal = Mathf.Lerp(recoverySpeed.accelerationNormalSpeed, movementSpeed.accelerationNormalSpeed, blend);
-        float accelMax    = Mathf.Lerp(recoverySpeed.accelerationMaxSpeed,    movementSpeed.accelerationMaxSpeed,    blend);
+    void MoveRigidBodyFwd()
+    {
+        float maxSpeed         = Mathf.Lerp(recoverySpeed.maxSpeed,         activeSpeed.maxSpeed,         recoveryBlend);
+        float acceleration     = Mathf.Lerp(recoverySpeed.acceleration,     activeSpeed.acceleration,     recoveryBlend);
+        float overspeedBraking = Mathf.Lerp(recoverySpeed.overspeedBraking, activeSpeed.overspeedBraking, recoveryBlend);
 
         float sqrSpeed = myRigidBody.velocity.sqrMagnitude;
-        if (sqrSpeed < normalSpeed)
-            myRigidBody.AddForce(transform.forward * accelNormal * Time.fixedDeltaTime, ForceMode.Force);
-        else if (sqrSpeed < maxSpeed)
-            myRigidBody.AddForce(transform.forward * accelMax * Time.fixedDeltaTime, ForceMode.Force);
-        // else at/over maxSpeed: coast, no extra force
+        if (sqrSpeed < maxSpeed)
+        {
+            myRigidBody.AddForce(transform.forward * acceleration * Time.fixedDeltaTime, ForceMode.Force);
+        }
+        else if (sqrSpeed > maxSpeed && overspeedBraking > 0f)
+        {
+            // Above the active cap (turbo just ended, or a slow zone started): ease back down to it.
+            // maxSpeed is a squared speed, so the target speed is its square root.
+            Vector3 velocity = myRigidBody.velocity;
+            float newSpeed = Mathf.MoveTowards(velocity.magnitude, Mathf.Sqrt(maxSpeed), overspeedBraking * Time.fixedDeltaTime);
+            myRigidBody.velocity = velocity.normalized * newSpeed;
+        }
+        // else at the cap with no overspeed braking: coast, no extra force
+
+        if (messageLabel != null)
+        {
+            messageLabel.text += "\n " + "maxSpeed " + maxSpeed;
+            messageLabel.text += "\n " + "acceleration " + acceleration;
+            messageLabel.text += "\n " + "recoveryBlend " + recoveryBlend;
+        }
     }
 
     void StopRigidBody()

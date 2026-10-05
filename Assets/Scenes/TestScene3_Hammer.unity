@@ -561,7 +561,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: movementSpeed.maxSpeed
-      value: 54
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.maxSpeed
@@ -576,8 +576,20 @@ PrefabInstance:
       value: 54
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
+      propertyPath: movementSpeed.rotateSpeed
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.normalSpeed
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
+      propertyPath: movementSpeed.acceleration
+      value: 5000000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
+      propertyPath: recoverySpeed.acceleration
+      value: 7000000
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.stopingPower
@@ -585,15 +597,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.accelerationMaxSpeed
-      value: 6000000
+      value: 7800000
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: movementSpeed.accelerationNormalSpeed
-      value: 20000000
+      value: 8500000
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.accelerationNormalSpeed
-      value: 3
+      value: 7000000
       objectReference: {fileID: 0}
     - target: {fileID: 7695563042282539077, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: m_Name
@@ -834,6 +846,10 @@ PrefabInstance:
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: movementSpeed.normalSpeed
       value: 54
+      objectReference: {fileID: 0}
+    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
+      propertyPath: movementSpeed.acceleration
+      value: 20000000
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: movementSpeed.accelerationNormalSpeed
