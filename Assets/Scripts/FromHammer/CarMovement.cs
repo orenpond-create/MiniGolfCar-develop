@@ -95,6 +95,7 @@ public class CarMovement : MonoBehaviour
                 UpdateStuckState();
                 if (!isStuck)
                     MoveRigidBodyFwd();
+                ApplyDrift();
             }
             else
                 StopRigidBody();
@@ -219,6 +220,20 @@ public class CarMovement : MonoBehaviour
         if (recoveryTimer > 0f)
             recoveryTimer = Mathf.Max(0f, recoveryTimer - Time.fixedDeltaTime);
         recoveryBlend = (recoveryTime > 0f) ? 1f - (recoveryTimer / recoveryTime) : 1f;
+    }
+
+    // Drift: the body turns instantly but the travel direction catches up over driftTime seconds.
+    // Each physics step the sideways part of the velocity (across the car's facing) decays
+    // exponentially, so the feel is framerate-independent. Grounded only - in the air we keep momentum.
+    void ApplyDrift()
+    {
+        float driftTime = Mathf.Lerp(recoverySpeed.driftTime, activeSpeed.driftTime, recoveryBlend);
+        float keep = (driftTime > 0f) ? Mathf.Exp(-Time.fixedDeltaTime / driftTime) : 0f;   // fraction of sideways speed kept this step
+
+        Vector3 velocity = myRigidBody.velocity;
+        Vector3 right = transform.right;
+        float sidewaysSpeed = Vector3.Dot(velocity, right);
+        myRigidBody.velocity = velocity - right * (sidewaysSpeed * (1f - keep));
     }
 
     void MoveRigidBodyFwd()

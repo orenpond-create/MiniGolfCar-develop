@@ -5779,6 +5779,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5792586420833966437, guid: bbea8fce5c99b5a4598791d739575a14, type: 3}
   m_PrefabInstance: {fileID: 228934145356400747}
   m_PrefabAsset: {fileID: 0}
+--- !u!54 &6360516276523222384 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 6586586742695709979, guid: bbea8fce5c99b5a4598791d739575a14, type: 3}
+  m_PrefabInstance: {fileID: 228934145356400747}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7695563042282539077 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7629510858771333166, guid: bbea8fce5c99b5a4598791d739575a14, type: 3}
@@ -5796,20 +5801,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3437aea39d20a545a8802189667b7b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myRigidBody: {fileID: 0}
+  myRigidBody: {fileID: 6360516276523222384}
   centerOfMass: {x: 0, y: -0.7, z: 0}
   movementSpeed:
     maxSpeed: 400
-    normalSpeed: 250
-    accelerationNormalSpeed: 15000000
-    accelerationMaxSpeed: 9000000
-    stopingPower: 7
-  rotateSpeedOnNormalSpeed: 5
-  rotateSpeedOnMaxSpeed: 5
+    acceleration: 4000000
+    rotateSpeed: 130
+    stopingPower: 5
+    overspeedBraking: 0
+    driftTime: 0.5
+  maxTiltAngle: 100
   groundMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 64
   checkGroundSensitivity: 1
+  recoverySpeed:
+    maxSpeed: 20
+    acceleration: 3500000
+    rotateSpeed: 90
+    stopingPower: 0.1
+    overspeedBraking: 0
+    driftTime: 0.25
+  stuckSpeedThreshold: 0.5
+  stuckDetectTime: 0.4
+  recoveryTime: 1.5
+  unstuckHeadingDelta: 20
   forwardPoint: {fileID: 3172136156027674616}
   backPoint: {fileID: 58518826385122280}
   leftPoint: {fileID: 4658816880513133351}
@@ -5821,3 +5837,4 @@ MonoBehaviour:
   leftBackPoint: {fileID: 6002789008787263758}
   pauseMovement: 0
   status: 0
+  messageLabel: {fileID: 0}

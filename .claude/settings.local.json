@@ -30,7 +30,8 @@
       "Bash(grep -vE \"PlayerValues|PlayerScore|//|\\\\\"Player\\\\\"|FindWithTag|CompareTag\")",
       "Bash(mv \"Player.cs\" \"HammerPlayer.cs\")",
       "Bash(mv \"Player.cs.meta\" \"HammerPlayer.cs.meta\")",
-      "PowerShell(Get-Process -Name \"Unity\",\"UnityHub\",\"UnityShaderCompiler\" -ErrorAction SilentlyContinue | Select-Object Name, Id, @{N='StartedFrom';E={$_.Path}} | Format-Table -AutoSize; if \\(-not \\(Get-Process -Name \"Unity\" -ErrorAction SilentlyContinue\\)\\) { \"Unity Editor process: NOT running \\(safe to delete\\)\" } else { \"Unity Editor process: RUNNING — do not delete yet\" })"
+      "PowerShell(Get-Process -Name \"Unity\",\"UnityHub\",\"UnityShaderCompiler\" -ErrorAction SilentlyContinue | Select-Object Name, Id, @{N='StartedFrom';E={$_.Path}} | Format-Table -AutoSize; if \\(-not \\(Get-Process -Name \"Unity\" -ErrorAction SilentlyContinue\\)\\) { \"Unity Editor process: NOT running \\(safe to delete\\)\" } else { \"Unity Editor process: RUNNING — do not delete yet\" })",
+      "mcp__visualize__read_me"
     ]
   }
 }

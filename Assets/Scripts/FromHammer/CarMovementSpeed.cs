@@ -14,4 +14,5 @@ public class CarMovementSpeed
     public float rotateSpeed = 90f;                                         // steering rate, deg/sec
     public float stopingPower;                                              // braking when both mouse buttons are held
     public float overspeedBraking;                                          // gentle decel (speed/sec) when above maxSpeed; 0 = just coast
+    public float driftTime = 0.25f;                                         // seconds for sideways slide to fade out after turning; 0 = no drift (instant grip)
 }
