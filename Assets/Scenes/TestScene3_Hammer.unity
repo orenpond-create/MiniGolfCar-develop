@@ -531,6 +531,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6360516276523222384, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
+      propertyPath: m_Constraints
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6752604858620689000, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -544,28 +548,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
-      propertyPath: myRigidBody
-      value: 
-      objectReference: {fileID: 963812407}
-    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: messageLabel
       value: 
       objectReference: {fileID: 941287952}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
-      propertyPath: groundMask.m_Bits
-      value: 64
-      objectReference: {fileID: 0}
-    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: rotateSpeedOnMaxSpeed
       value: 130
-      objectReference: {fileID: 0}
-    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
-      propertyPath: movementSpeed.maxSpeed
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
-      propertyPath: recoverySpeed.maxSpeed
-      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: rotateSpeedOnNormalSpeed
@@ -576,24 +564,16 @@ PrefabInstance:
       value: 54
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
-      propertyPath: movementSpeed.rotateSpeed
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.normalSpeed
       value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: movementSpeed.acceleration
-      value: 5000000
+      value: 4500000
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.acceleration
-      value: 7000000
-      objectReference: {fileID: 0}
-    - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
-      propertyPath: recoverySpeed.stopingPower
-      value: 0.1
+      value: 3500000
       objectReference: {fileID: 0}
     - target: {fileID: 7552475137126826220, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: recoverySpeed.accelerationMaxSpeed
@@ -610,6 +590,10 @@ PrefabInstance:
     - target: {fileID: 7695563042282539077, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: m_Name
       value: Hummer (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7695563042282539077, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8172422499508906008, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
       propertyPath: m_Enabled
@@ -1400,11 +1384,6 @@ Transform:
 --- !u!4 &963812406 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 494723169253537123, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
-  m_PrefabInstance: {fileID: 585649758}
-  m_PrefabAsset: {fileID: 0}
---- !u!54 &963812407 stripped
-Rigidbody:
-  m_CorrespondingSourceObject: {fileID: 6360516276523222384, guid: 5bcfda8f99388d64ab697d95b1e3b381, type: 3}
   m_PrefabInstance: {fileID: 585649758}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &996087533
