@@ -22,6 +22,10 @@ public class CarMovement : MonoBehaviour
     [Header("Ground Check")]
     [SerializeField] LayerMask groundMask;                   // replaces LevelManager.layerMaskEnemy_Solids_NotPlayer
     [SerializeField] float checkGroundSensitivity = 1f;
+    [Header("Air Control")]
+    [SerializeField, Range(0f, 1f)] float airSteerMultiplier = 1f;   // 0 = no steering in the air, 1 = full (today's behavior)
+    [SerializeField] bool allowAirAcceleration = false;              // false = momentum only (today's behavior)
+    [SerializeField] float airborneGraceTime = 0.1f;                 // off the ground this long before it counts as "in the air"
     [Header("Stuck / Recovery")]
     [SerializeField] CarMovementSpeed recoverySpeed;        // slow accel + low max used right after getting unstuck
     [SerializeField] float stuckSpeedThreshold = 0.5f;      // forward speed below this counts as "not moving"
@@ -47,6 +51,8 @@ public class CarMovement : MonoBehaviour
     bool isStoping;             // true while braking (both buttons held)
     bool onFliping;
     bool onGround;
+    bool isAirborne;            // true once the car has been off the ground longer than airborneGraceTime
+    float timeOffGround;
     Vector3 down;
     RaycastHit hit;
     bool isStuck;
@@ -88,6 +94,7 @@ public class CarMovement : MonoBehaviour
 
         TickRecovery();
         CheckOnGround();
+        TickAirborne();
         if (onGround)
         {
             if (!isStoping)
@@ -103,9 +110,24 @@ public class CarMovement : MonoBehaviour
         else
         {
             myRigidBody.AddForce(10f * Vector3.down, ForceMode.Acceleration);
+
+            if (allowAirAcceleration && !isStoping)
+            {
+                if (messageLabel != null)
+                    messageLabel.text = "In air";     // MoveRigidBodyFwd appends to the label, so reset it here
+                MoveRigidBodyFwd();
+            }
         }
 
         ApplyRotation();
+    }
+
+    // onGround flickers on bumps and small cubes, so only treat the car as airborne after it has
+    // stayed off the ground for airborneGraceTime. Used to gate air steering.
+    void TickAirborne()
+    {
+        timeOffGround = onGround ? 0f : timeOffGround + Time.fixedDeltaTime;
+        isAirborne = timeOffGround > airborneGraceTime;
     }
 
     // Always driving forward; LMB steers left, RMB steers right, BOTH brakes to a stop.
@@ -162,10 +184,11 @@ public class CarMovement : MonoBehaviour
     {
         Quaternion target = myRigidBody.rotation;
 
-        // Steer (yaw) unless braking.
-        if (!isStoping && rotateDirection != 0f)
+        // Steer (yaw) unless braking. In the air the turn rate is scaled by airSteerMultiplier.
+        float steerFactor = isAirborne ? airSteerMultiplier : 1f;
+        if (!isStoping && rotateDirection != 0f && steerFactor > 0f)
         {
-            float turnRate = Mathf.Lerp(recoverySpeed.rotateSpeed, activeSpeed.rotateSpeed, recoveryBlend);
+            float turnRate = Mathf.Lerp(recoverySpeed.rotateSpeed, activeSpeed.rotateSpeed, recoveryBlend) * steerFactor;
             target = target * Quaternion.Euler(0f, rotateDirection * turnRate * Time.fixedDeltaTime, 0f);
         }
 
@@ -242,7 +265,11 @@ public class CarMovement : MonoBehaviour
         float acceleration     = Mathf.Lerp(recoverySpeed.acceleration,     activeSpeed.acceleration,     recoveryBlend);
         float overspeedBraking = Mathf.Lerp(recoverySpeed.overspeedBraking, activeSpeed.overspeedBraking, recoveryBlend);
 
-        float sqrSpeed = myRigidBody.velocity.sqrMagnitude;
+        // Horizontal speed only: a fast fall or jump must not count as "at the speed cap",
+        // and the overspeed braking must not slow the vertical movement.
+        Vector3 velocity = myRigidBody.velocity;
+        Vector3 horizontal = new Vector3(velocity.x, 0f, velocity.z);
+        float sqrSpeed = horizontal.sqrMagnitude;
         if (sqrSpeed < maxSpeed)
         {
             myRigidBody.AddForce(transform.forward * acceleration * Time.fixedDeltaTime, ForceMode.Force);
@@ -251,9 +278,9 @@ public class CarMovement : MonoBehaviour
         {
             // Above the active cap (turbo just ended, or a slow zone started): ease back down to it.
             // maxSpeed is a squared speed, so the target speed is its square root.
-            Vector3 velocity = myRigidBody.velocity;
-            float newSpeed = Mathf.MoveTowards(velocity.magnitude, Mathf.Sqrt(maxSpeed), overspeedBraking * Time.fixedDeltaTime);
-            myRigidBody.velocity = velocity.normalized * newSpeed;
+            float newSpeed = Mathf.MoveTowards(horizontal.magnitude, Mathf.Sqrt(maxSpeed), overspeedBraking * Time.fixedDeltaTime);
+            Vector3 newHorizontal = horizontal.normalized * newSpeed;
+            myRigidBody.velocity = new Vector3(newHorizontal.x, velocity.y, newHorizontal.z);
         }
         // else at the cap with no overspeed braking: coast, no extra force
 

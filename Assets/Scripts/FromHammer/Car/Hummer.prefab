@@ -5814,7 +5814,10 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  checkGroundSensitivity: 1
+  checkGroundSensitivity: 0.2
+  airSteerMultiplier: 1
+  allowAirAcceleration: 0
+  airborneGraceTime: 0.1
   recoverySpeed:
     maxSpeed: 20
     acceleration: 3500000
