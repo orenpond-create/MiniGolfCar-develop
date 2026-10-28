@@ -95,7 +95,10 @@ public class CarMovement : MonoBehaviour
         TickRecovery();
         CheckOnGround();
         TickAirborne();
-        if (onGround)
+
+        // Driving uses the grace-time state (isAirborne), not the raw ray result, so a brief ray miss
+        // (a bump, or the pitch change at the foot of a ramp) doesn't cut the engine mid-climb.
+        if (!isAirborne)
         {
             if (!isStoping)
             {
@@ -107,23 +110,21 @@ public class CarMovement : MonoBehaviour
             else
                 StopRigidBody();
         }
-        else
+        else if (allowAirAcceleration && !isStoping)
         {
-            myRigidBody.AddForce(10f * Vector3.down, ForceMode.Acceleration);
-
-            if (allowAirAcceleration && !isStoping)
-            {
-                if (messageLabel != null)
-                    messageLabel.text = "In air";     // MoveRigidBodyFwd appends to the label, so reset it here
-                MoveRigidBodyFwd();
-            }
+            if (messageLabel != null)
+                messageLabel.text = "In air";     // MoveRigidBodyFwd appends to the label, so reset it here
+            MoveRigidBodyFwd();
         }
+
+        if (!onGround)
+            myRigidBody.AddForce(10f * Vector3.down, ForceMode.Acceleration);
 
         ApplyRotation();
     }
 
     // onGround flickers on bumps and small cubes, so only treat the car as airborne after it has
-    // stayed off the ground for airborneGraceTime. Used to gate air steering.
+    // stayed off the ground for airborneGraceTime. Used to gate driving and air steering.
     void TickAirborne()
     {
         timeOffGround = onGround ? 0f : timeOffGround + Time.fixedDeltaTime;
