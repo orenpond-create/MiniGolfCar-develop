@@ -8,6 +8,7 @@
 - [MiniCarGolf game design](minicargolf-game-design.md) — intended ball↔vehicle transform game loop (not yet implemented)
 - [Car controller design](car-controller-design.md) — how CarMovement.cs works now, ramp measurements, applied fixes, open ideas
 - [Test course](test-course.md) — TestScene4_TerrianClaude course builder, stations, known issues
+- [Ball course](ball-course.md) — TestScene5_BallCourse golf hole, golf-ball physics setup, test results, open fixes
 - [Unity MCP notes](unity-mcp-notes.md) — working with the Unity MCP; collider-material copy trap and other gotchas
 - [Car variants (history)](car-variants-resume-point.md) — finished carA/carB/carReal experiment, superseded by CarMovement
 - [Hummer jump issue (resolved)](hummer-jump-issue.md) — cause of the cube launches and the fix applied
