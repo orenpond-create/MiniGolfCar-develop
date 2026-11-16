@@ -5728,6 +5728,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7629510858771333166, guid: bbea8fce5c99b5a4598791d739575a14, type: 3}
       insertIndex: 1
       addedObject: {fileID: 7552475137126826220}
+    - targetCorrespondingSourceObject: {fileID: 7629510858771333166, guid: bbea8fce5c99b5a4598791d739575a14, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7243274111349559850}
   m_SourcePrefab: {fileID: 100100000, guid: bbea8fce5c99b5a4598791d739575a14, type: 3}
 --- !u!4 &58518826385122280 stripped
 Transform:
@@ -5841,3 +5844,19 @@ MonoBehaviour:
   pauseMovement: 0
   status: 0
   messageLabel: {fileID: 0}
+--- !u!114 &7243274111349559850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7695563042282539077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bd4834b38494b147a11c3369116c375, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xrayMaterial: {fileID: 2100000, guid: e4c68c12168073e40ada4d24cf3d2c15, type: 2}
+  maskMaterial: {fileID: 2100000, guid: 2cf0e89dc90ea284981f8d3f669183e8, type: 2}
+  bakedMesh: {fileID: 4300000, guid: 50dfa115a548d8f40a8819d74af5fd78, type: 2}
+  seeThroughRadius: 1

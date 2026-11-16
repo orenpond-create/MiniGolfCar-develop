@@ -578,7 +578,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 479e47ad3a2301a4dbb8d42cd2424e3c, type: 2}
+  - {fileID: 2100000, guid: 69ab2b3c60ab8694e8e55ab20a964281, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -745,6 +745,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -826,6 +827,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 166242637}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2948867cc193e2f4694238f0a04fc9f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  hiddenFraction: 0.5
+  fadeTime: 0.15
+  occluderLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &1048431001
 GameObject:
   m_ObjectHideFlags: 0
@@ -1110,7 +1129,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 479e47ad3a2301a4dbb8d42cd2424e3c, type: 2}
+  - {fileID: 2100000, guid: 69ab2b3c60ab8694e8e55ab20a964281, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1405,7 +1424,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 479e47ad3a2301a4dbb8d42cd2424e3c, type: 2}
+  - {fileID: 2100000, guid: 69ab2b3c60ab8694e8e55ab20a964281, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2214,6 +2233,7 @@ GameObject:
   - component: {fileID: 2069705398}
   - component: {fileID: 2069705400}
   - component: {fileID: 2069705399}
+  - component: {fileID: 2069705401}
   m_Layer: 3
   m_Name: PlayerBall
   m_TagString: Untagged
@@ -2383,6 +2403,22 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 3.5128808
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2069705401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069705392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bd4834b38494b147a11c3369116c375, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xrayMaterial: {fileID: 2100000, guid: 8b769114bc7e5944cb5d8b29211212b1, type: 2}
+  maskMaterial: {fileID: 2100000, guid: 9f1afacddc0a8c348b644dcf0bd015b0, type: 2}
+  bakedMesh: {fileID: 0}
+  seeThroughRadius: 0.12
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
