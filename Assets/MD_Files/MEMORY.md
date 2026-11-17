@@ -1,5 +1,7 @@
 # Memory Index
 
+- [Occlusion follow-up](resume-occlusion-check.md) — hidden ball/car outline done and tested; waiting for the user's own check
+
 - [Ask before acting](ask-before-acting.md) — discuss only; get explicit approval before any code change or action
 - [Ask when info is missing](ask-when-info-missing.md) — before any complex action, ask about missing/ambiguous details instead of guessing
 - [Language preference](language-preference.md) — user writes Hebrew or English; always reply in English unless told otherwise

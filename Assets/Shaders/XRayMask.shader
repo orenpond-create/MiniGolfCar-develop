@@ -1,7 +1,7 @@
-// Invisible pre-pass for XRaySilhouette: marks the stencil buffer wherever the object is VISIBLE
-// (passes the normal depth test). The X-ray pass afterwards only draws where this mark is missing,
-// so parts hidden by the object itself (far wheels behind the body) don't glow - only parts hidden
-// by something else do. Draws no colour.
+// Invisible pre-pass for XRaySilhouette: marks the piece's WHOLE silhouette in the stencil buffer
+// (ZTest Always - whether or not it's hidden). The XRayOutline pass afterwards only draws outside this
+// mark, so the outline becomes a ring around the piece instead of covering it. Draws no colour.
+// Give each piece its own stencil ref (ball 2, car 1) and use the same ref on its outline material.
 Shader "MiniCarGolf/XRayMask"
 {
     Properties
@@ -15,9 +15,8 @@ Shader "MiniCarGolf/XRayMask"
         {
             ColorMask 0
             ZWrite Off
-            ZTest LEqual
-            Offset -1, -1
-            Cull Back
+            ZTest Always
+            Cull Off
             Stencil
             {
                 Ref [_StencilRef]

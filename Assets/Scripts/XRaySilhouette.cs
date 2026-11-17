@@ -1,28 +1,28 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-// Draws this object (every child MeshRenderer, every sub-mesh) as a glowing silhouette wherever
-// something else hides it. Needed for multi-material models like the car: adding a second material to
-// a renderer only covers its last sub-mesh, so the parts are drawn again with Graphics.DrawMesh.
-// A stencil mask pass first marks where the object is visible, so parts hidden only by the object
-// itself (far wheels behind the body) don't glow.
+// Draws a constant-width outline (in screen pixels) around this piece wherever something else hides it,
+// like the hidden-ball outline in Golf With Your Friends. Same look for the ball and the car.
 //
-// Cost: with a baked mesh (all parts merged once in the editor, in this object's local space) the whole
-// object is 2 extra draw calls per frame. The Hummer has 65 parts / 85 sub-meshes, which would
-// otherwise be 170. Baking happens in the editor because merging at runtime needs Read/Write enabled on
-// the model, which costs memory. Re-bake (right-click this component > Bake X-ray mesh) if the model
-// changes. A baked mesh is only valid while no part moves relative to this object; leave it empty if
-// parts animate (e.g. spinning wheels) - then it draws each sub-mesh separately.
+// Each frame:
+//   1. maskMaterial (XRayMask) marks the piece's whole silhouette in the stencil buffer.
+//   2. outlineMaterial (XRayOutline) draws a slightly inflated copy, only OUTSIDE that silhouette and only
+//      where something is in front of it - a ring around the hidden piece, nothing when it's visible.
+// Colour, width (pixels) and the hidden threshold are set on the outline material.
 //
-// Also used by OcclusionWindow (on the camera): See Through Radius sets the size of the see-through
-// circle opened in surfaces that hide this piece, and the piece's colliders decide when it counts as hidden.
+// Multi-material models (the car: 65 parts / 85 sub-meshes) use a baked mesh - all parts merged once in the
+// editor, with smoothed normals in UV4 so the outline doesn't break at sharp corners - so the whole piece
+// costs 2 extra draw calls. Baking is done in the editor because merging at runtime needs Read/Write on
+// the model. Re-bake (right-click this component > Bake X-ray mesh) if the model changes. A baked mesh is
+// only valid while no part moves relative to this object.
+// Leave Baked Mesh empty for single smooth meshes (the ball): then each sub-mesh is drawn directly.
 public class XRaySilhouette : MonoBehaviour
 {
-    [SerializeField] Material xrayMaterial;   // MiniCarGolf/BallXRay, stencil compare NotEqual
-    [SerializeField] Material maskMaterial;   // MiniCarGolf/XRayMask, same stencil ref as xrayMaterial
-    [SerializeField] Mesh bakedMesh;          // optional: all parts merged (see above)
-    [Header("See-through window")]
-    [SerializeField, Min(0f)] float seeThroughRadius = 0.12f;   // metres: radius of the see-through circle around this piece
+    [FormerlySerializedAs("xrayMaterial")]
+    [SerializeField] Material outlineMaterial;   // MiniCarGolf/XRayOutline
+    [SerializeField] Material maskMaterial;      // MiniCarGolf/XRayMask, same stencil ref as the outline
+    [SerializeField] Mesh bakedMesh;             // optional: all parts merged (see above)
 
     struct Part
     {
@@ -31,41 +31,7 @@ public class XRaySilhouette : MonoBehaviour
         public int subMeshes;
     }
 
-    static readonly List<XRaySilhouette> active = new List<XRaySilhouette>();
     readonly List<Part> parts = new List<Part>();
-    Collider[] colliders;
-
-    public static XRaySilhouette FirstActive => active.Count > 0 ? active[0] : null;
-    public float SeeThroughRadius => seeThroughRadius;
-
-    // World bounds of the piece's solid colliders (body, wheels / ball), falling back to its renderers.
-    // Colliders are used because renderer bounds include things like the car's tall antennas.
-    public Bounds WorldBounds
-    {
-        get
-        {
-            bool found = false;
-            Bounds b = new Bounds(transform.position, Vector3.zero);
-            foreach (Collider c in colliders)
-            {
-                if (c == null || !c.enabled || c.isTrigger || !c.gameObject.activeInHierarchy)
-                    continue;
-                if (found) b.Encapsulate(c.bounds);
-                else { b = c.bounds; found = true; }
-            }
-            if (!found)
-            {
-                foreach (Part p in parts)
-                {
-                    if (p.renderer == null || !p.renderer.enabled)
-                        continue;
-                    if (found) b.Encapsulate(p.renderer.bounds);
-                    else { b = p.renderer.bounds; found = true; }
-                }
-            }
-            return b;
-        }
-    }
 
     void OnEnable()
     {
@@ -76,26 +42,19 @@ public class XRaySilhouette : MonoBehaviour
             if (f != null && f.sharedMesh != null)
                 parts.Add(new Part { filter = f, renderer = r, subMeshes = f.sharedMesh.subMeshCount });
         }
-        colliders = GetComponentsInChildren<Collider>(true);
-        active.Add(this);
-    }
-
-    void OnDisable()
-    {
-        active.Remove(this);
     }
 
     // LateUpdate so transforms are final for this frame.
     void LateUpdate()
     {
-        if (xrayMaterial == null || maskMaterial == null)
+        if (outlineMaterial == null || maskMaterial == null)
             return;
 
         if (bakedMesh != null)
         {
             Matrix4x4 m = transform.localToWorldMatrix;
             Graphics.DrawMesh(bakedMesh, m, maskMaterial, gameObject.layer, null, 0, null, false, false);
-            Graphics.DrawMesh(bakedMesh, m, xrayMaterial, gameObject.layer, null, 0, null, false, false);
+            Graphics.DrawMesh(bakedMesh, m, outlineMaterial, gameObject.layer, null, 0, null, false, false);
             return;
         }
 
@@ -107,13 +66,13 @@ public class XRaySilhouette : MonoBehaviour
             for (int s = 0; s < p.subMeshes; s++)
             {
                 Graphics.DrawMesh(p.filter.sharedMesh, matrix, maskMaterial, gameObject.layer, null, s, null, false, false);
-                Graphics.DrawMesh(p.filter.sharedMesh, matrix, xrayMaterial, gameObject.layer, null, s, null, false, false);
+                Graphics.DrawMesh(p.filter.sharedMesh, matrix, outlineMaterial, gameObject.layer, null, s, null, false, false);
             }
         }
     }
 
-    // Merges every enabled MeshRenderer part into one single-sub-mesh mesh in this object's local space.
-    // Editor use: meshes without Read/Write can still be read in the editor.
+    // Merges every enabled MeshRenderer part into one single-sub-mesh mesh in this object's local space,
+    // with smoothed normals in UV4 for the outline. Editor use: meshes without Read/Write can still be read there.
     public Mesh BuildCombinedMesh()
     {
         var instances = new List<CombineInstance>();
@@ -130,7 +89,32 @@ public class XRaySilhouette : MonoBehaviour
         var mesh = new Mesh { name = name + " x-ray", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
         mesh.CombineMeshes(instances.ToArray(), true, true);
         mesh.RecalculateBounds();
+        mesh.SetUVs(3, SmoothNormals(mesh));
         return mesh;
+    }
+
+    // Averages the normals of all vertices sharing a position (hard edges split them into several vertices),
+    // so the inflated outline stays closed at the model's corners.
+    static List<Vector3> SmoothNormals(Mesh mesh)
+    {
+        Vector3[] vertices = mesh.vertices;
+        Vector3[] normals = mesh.normals;
+        var sums = new Dictionary<Vector3Int, Vector3>();
+        var keys = new Vector3Int[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Vector3Int key = Vector3Int.RoundToInt(vertices[i] * 10000f);   // 0.1 mm buckets
+            keys[i] = key;
+            sums.TryGetValue(key, out Vector3 sum);
+            sums[key] = sum + normals[i];
+        }
+        var result = new List<Vector3>(vertices.Length);
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            Vector3 n = sums[keys[i]];
+            result.Add(n.sqrMagnitude > 1e-12f ? n.normalized : normals[i]);
+        }
+        return result;
     }
 
 #if UNITY_EDITOR

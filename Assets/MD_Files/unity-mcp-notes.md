@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: 5ab888ac-81a1-48db-8bb5-d2a32b148546
-  modified: 2026-11-04T19:45:23.372Z
+  modified: 2026-11-17T17:52:01.879Z
 ---
 
 The user installed a Unity MCP server (tools `mcp__UnityMCP__*`, resources `mcpforunity://...`) around 2026-10-28. It lets me read the live scene, set component properties, run in-memory C# (`execute_code`), enter/exit Play mode, read the Console and save scenes. Unity 2022.3.62f3, Cinemachine 2.10.4, Terrain Tools 5.0.6. ProBuilder not installed.
@@ -16,6 +16,11 @@ The user installed a Unity MCP server (tools `mcp__UnityMCP__*`, resources `mcpf
 - Instance IDs can change after a recompile; find objects again by path.
 - Timed sampling in Play mode: register an `EditorApplication.update` callback that logs to the Console when done, then read it with `read_console`. Clear private state (e.g. CarMovement `isStuck`) via reflection when teleporting the car.
 - Prefer menu-item editor scripts or the MCP over hand-editing `.unity`/`.prefab` YAML. Terrain `.asset` files are binary.
-- Check the scene's dirty state before saving: saving also saves the user's unsaved edits. Ask first.
+- Check the scene's dirty state before saving: saving also saves the user's unsaved edits. Ask first. `EditorSceneManager.OpenScene` silently discards a dirty scene - always check isDirty first.
+- `Graphics.DrawMesh` called from an `EditorApplication.update` callback does NOT reach the game camera - test draws must come from a component's Update/LateUpdate.
+- `UNITY_MATRIX_P[1][1]` flips sign when Unity renders into an intermediate texture (e.g. MSAA in the Game view); use abs() for pixel-size maths or outlines shrink inward.
+- Change a material's shader BEFORE deleting its old shader file: with the shader missing, `material.color` reads black and copying it destroys the colour.
+- execute_code's safety filter blocks `AssetDatabase.DeleteAsset`; overwrite with `EditorUtility.CopySerialized` or delete files via the shell (with their .meta) after checking nothing references them.
+- When forcing a "draw everywhere" debug state, don't push geometry away from the camera: perspective makes it smaller and the test lies.
 
 Still follow [[ask-before-acting]] for every change. Related: [[car-controller-design]], [[test-course]].

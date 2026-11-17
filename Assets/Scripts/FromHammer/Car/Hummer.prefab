@@ -5856,7 +5856,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bd4834b38494b147a11c3369116c375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xrayMaterial: {fileID: 2100000, guid: e4c68c12168073e40ada4d24cf3d2c15, type: 2}
+  outlineMaterial: {fileID: 2100000, guid: e4c68c12168073e40ada4d24cf3d2c15, type: 2}
   maskMaterial: {fileID: 2100000, guid: 2cf0e89dc90ea284981f8d3f669183e8, type: 2}
   bakedMesh: {fileID: 4300000, guid: 50dfa115a548d8f40a8819d74af5fd78, type: 2}
-  seeThroughRadius: 1

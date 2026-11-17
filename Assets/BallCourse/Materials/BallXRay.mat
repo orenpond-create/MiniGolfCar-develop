@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: BallXRay
-  m_Shader: {fileID: 4800000, guid: 7c0e79480e56a604bb90002c053d3e31, type: 3}
+  m_Shader: {fileID: 4800000, guid: a85384a3efa7ae6438774eabefdbf6d1, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -25,13 +25,16 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _DepthBias: 0.03
     - _FillAlpha: 0.15
     - _LatitudeLines: 4
     - _LineWidth: 1.2
     - _LongitudeLines: 6
+    - _OutlineWidth: 3
     - _RimPower: 2
     - _StencilComp: 6
     - _StencilRef: 2
+    - _UseSmoothNormals: 0
     m_Colors:
-    - _Color: {r: 0.19999996, g: 0.9, b: 1, a: 1}
+    - _Color: {r: 0.2, g: 0.9, b: 1, a: 1}
   m_BuildTextureStacks: []
